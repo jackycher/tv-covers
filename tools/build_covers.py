@@ -9,6 +9,7 @@ import io
 import json
 import os
 import time
+import urllib.parse
 import urllib.request
 
 from PIL import Image
@@ -20,12 +21,25 @@ ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 COL_DIR = os.path.join(ROOT, "column")
 DATA_FILE = os.path.join(ROOT, "data", "columns.json")
 REFERER = "https://tv.cctv.cn/lm/index.shtml"
+# cntv 的图片对海外机房 IP 返回 403，GitHub 的 runner 拉不到；
+# 这里退一步，让 images.weserv.nl 帮忙取图并顺手做成 360×480 白底竖版。
+PROXY = ("https://images.weserv.nl/?url=%s"
+         "&w=360&h=480&fit=contain&bg=white&output=png")
 
 
 def fetch(url):
     req = urllib.request.Request(url, headers={"User-Agent": UA, "Referer": REFERER})
     with urllib.request.urlopen(req, timeout=60) as r:
         return r.read()
+
+
+def grab(logo):
+    """取封面原图；直连被拒（403 等）时改走 weserv 代理，返回 (bytes, 是否已成型)。"""
+    try:
+        return fetch(logo), False
+    except Exception as e:
+        print("直连失败 %s，改走代理: %s" % (logo, e))
+        return fetch(PROXY % urllib.parse.quote(logo, safe="")), True
 
 
 def all_columns():
@@ -42,11 +56,15 @@ def all_columns():
     return out
 
 
-def portrait(raw):
+def portrait(raw, ready=False):
     """原图等比缩放后居中放在 360x480 纯白画布上：整张海报完整可见，不裁不拉伸。"""
-    img = Image.open(io.BytesIO(raw)).convert("RGBA")
+    img = Image.open(io.BytesIO(raw))
     if img.width < 1 or img.height < 1:
         raise ValueError("空图")
+    if ready and img.size == (W, H):
+        # 代理已经按 contain + 白底做好了，别再缩放一次
+        return img.convert("RGB")
+    img = img.convert("RGBA")
     scale = min((W - 16) / img.width, (H - 16) / img.height, 999)
     nw, nh = max(1, int(round(img.width * scale))), max(1, int(round(img.height * scale)))
     img = img.resize((nw, nh), Image.LANCZOS)
@@ -81,10 +99,13 @@ def main():
             manifest[cid] = {"name": name, "logo": "", "cover": False}
             continue
         try:
-            img = portrait(fetch(logo))
+            raw, ready = grab(logo)
+            img = portrait(raw, ready)
             img.save(path, "JPEG", quality=86, optimize=True)
             manifest[cid] = {"name": name, "logo": logo, "cover": True}
             added += 1
+            if added % 50 == 0:
+                print("已处理 %d 张" % added)
         except Exception as e:  # 单张失败不影响其余
             print("跳过 %s %s: %s" % (cid, name, e))
             failed += 1
