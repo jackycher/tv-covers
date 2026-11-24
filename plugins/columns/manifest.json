@@ -1,0 +1,9 @@
+{
+  "name": "栏目大全",
+  "version": "1.1.0",
+  "author": "doubao",
+  "description": "栏目页（tv.cctv.cn/lm）栏目清单：按频道编号排序，封面用 jackycher/tv-covers 每日更新的 360×480 白底竖版图（仓库缺图时回退在线适配），每期完整版可听，并列出当天具体节目",
+  "scripts": [
+    "cctvlm.js"
+  ]
+}
