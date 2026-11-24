@@ -1,9 +1,0 @@
-{
-  "name": "央视栏目大全",
-  "version": "1.0.9",
-  "author": "doubao",
-  "description": "央视网栏目大全（tv.cctv.cn/lm）：按 CCTV-1…17 排序的栏目清单，封面用 jackycher/tv-covers 每日更新的 360×480 白底竖版图（仓库缺图时回退在线适配），每期完整版可听，并列出当天具体节目",
-  "scripts": [
-    "cctvlm.js"
-  ]
-}
