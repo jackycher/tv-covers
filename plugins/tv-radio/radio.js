@@ -1,9 +1,9 @@
 // 电台直播源 fanmingming/live radio/m3u/fm.m3u —— 只保留「电视伴音」分组
-// 这一组都是央视/卫视直播的纯音频地址（m3u8 直链），可以直接播放。
+// 这一组都是国家台/卫视直播的纯音频地址（m3u8 直链），可以直接播放。
 // 列表与台标：m3u 走 jsDelivr 镜像（GitHub 原站在国内经常连不上）；
-//   CCTV 各频道台标用 whykan/ssxz 的 cctv-icons（gitee 直链，快且稳），
+//   CH 各频道台标用 whykan/ssxz 的 cctv-icons（gitee 直链，快且稳），
 //   其余台标用 fanmingming 仓库 tv 目录（jsDelivr 镜像）。
-// 节目单：央视 EPG epginfo3，一次请求拿多台，含 isLive 与当天每档节目的 st/et，
+// 节目单：国家台 EPG epginfo3，一次请求拿多台，含 isLive 与当天每档节目的 st/et，
 //   列表里显示「正在播」，详情里给出带 ▶ 的当日完整节目单。
 (function () {
   var M3U_URL = 'https://cdn.jsdelivr.net/gh/fanmingming/live/radio/m3u/fm.m3u';
@@ -21,7 +21,7 @@
 
   // 台标全部取 jackycher/tv-covers 仓库（360×480 白底竖版，jsDelivr 分发）：
   // cctv/ 下是搬运的 cctv-icons，satellite/ 下是卫视/CETV/凤凰已转好的竖版图
-  var ICON_BASE = 'https://cdn.jsdelivr.net/gh/jackycher/tv-covers@main/cctv/';
+  var ICON_BASE = 'https://cdn.jsdelivr.net/gh/jackycher/tv-covers@main/ch/';
   var LOGO_BASE = 'https://cdn.jsdelivr.net/gh/jackycher/tv-covers@main/satellite/';
   var GITEE_CODES = {
     cctv1: 1, cctv2: 1, cctv3: 1, cctv4: 1, cctv5: 1, cctv5plus: 1, cctv6: 1, cctv7: 1,
@@ -31,7 +31,7 @@
 
   // 卫视 / CETV / 凤凰：原图是 300×180 的透明横图，直接放进竖版卡片位会被裁切、
   // 文字挤在一起。这里不改原图、也不另存图片，而是交给图片处理服务实时改成
-  // 360×480 白底竖版（等比装进画布，不裁不拉伸），效果与 CCTV 台标一致。
+  // 360×480 白底竖版（等比装进画布，不裁不拉伸），效果与 CH 台标一致。
   var RESIZE = 'https://images.weserv.nl/?url=';
 
   function fill(url) {
@@ -39,7 +39,7 @@
       '&w=360&h=480&fit=contain&bg=white&output=webp&q=72';
   }
 
-  // 台名 -> 央视 EPG 频道代号（没有的台只显示直播，不显示节目单）
+  // 台名 -> 国家台 EPG 频道代号（没有的台只显示直播，不显示节目单）
   var EPG_CODES = {
     'CCTV1': 'cctv1', 'CCTV2': 'cctv2', 'CCTV3': 'cctv3', 'CCTV4': 'cctv4',
     'CCTV5': 'cctv5', 'CCTV5+': 'cctv5plus', 'CCTV6': 'cctv6', 'CCTV7': 'cctv7',
@@ -56,7 +56,7 @@
     '贵州卫视': 'guizhou', '甘肃卫视': 'gansu', '延边卫视': 'yanbian', '西藏卫视': 'xizang',
     '江西卫视': 'jiangxi', '宁夏卫视': 'ningxia', '青海卫视': 'qinghai', '内蒙古卫视': 'neimenggu',
     '新疆卫视': 'xinjiang', '香港卫视': 'xianggangweishi',
-    // 凤凰两台央视 EPG 没有，走凤凰自己的节目单接口 phtvperiodlist
+    // 凤凰两台国家台 EPG 没有，走凤凰自己的节目单接口 phtvperiodlist
     '凤凰资讯': 'phtvNews', '凤凰中文': 'phtvChinese', '凤凰卫视': 'phtvChinese'
   };
 
@@ -85,10 +85,18 @@
     return h;
   }
 
-  // 台标：CCTV 与卫视/凤凰都在仓库里备好 360×480 白底竖版，直接取直链，不再实时处理
+  // 台标：CH 与卫视/凤凰都在仓库里备好 360×480 白底竖版，直接取直链，不再实时处理
+  // 台标文件名（ch/ 目录下）：频道代号 -> 文件名
+  var ICON_FILES = {
+    cctv1: '1', cctv2: '2', cctv3: '3', cctv4: '4', cctv5: '5', cctv5plus: '5plus', cctv6: '6', cctv7: '7',
+    cctv8: '8', cctvjilu: 'jilu', cctv10: '10', cctv11: '11', cctv12: '12', cctv13: '13', cctvchild: 'child',
+    cctv15: '15', cctv16: '16', cctv17: '17', cctveurope: 'europe', cctvamerica: 'america'
+  };
+
   function logoOf(title) {
     var code = EPG_CODES[title];
-    if (code && GITEE_CODES[code]) return ICON_BASE + code + '.png';
+    var file = code && ICON_FILES[code];
+    if (file) return ICON_BASE + file + '.png';
     return LOGO_BASE + encodeURIComponent(title.replace(/\s+/g, '') + '.png');
   }
 
@@ -125,9 +133,9 @@
     return { title: title, url: url, logo: fixLogo(attrs['tvg-logo'] || '', title), group: group };
   }
 
-  // 央视 / 卫视 / 其他，作为二级分类
+  // 国家台 / 卫视 / 其他，作为二级分类
   function subGroupOf(item) {
-    if (/^CCTV/i.test(item.title)) return '央视';
+    if (/^CCTV/i.test(item.title)) return '国家台';
     if (/^(CETV|中国教育)/i.test(item.title)) return '其他';
     if (item.title.indexOf('卫视') >= 0) return '卫视';
     return '其他';
@@ -245,7 +253,7 @@
         };
       }
     }
-    // 凤凰两台：央视 EPG 里没有，补上凤凰自己的节目单
+    // 凤凰两台：国家台 EPG 里没有，补上凤凰自己的节目单
     var ph = {};
     try { ph = phNodes(host, beijingDay(Date.now()).replace(/(\d{4})(\d{2})(\d{2})/, '$1-$2-$3')); } catch (e3) { ph = {}; }
     for (k in ph) map[k] = ph[k];
@@ -311,7 +319,7 @@
     name: '电视伴音',
     url: 'https://github.com/fanmingming/live',
     group: '广播',
-    description: '央视与卫视直播的电视伴音（fm.m3u 电视伴音分组），带台标、正在播出的节目和当日节目单，在线收听',
+    description: '国家台与卫视直播的电视伴音（fm.m3u 电视伴音分组），带台标、正在播出的节目和当日节目单，在线收听',
 
     search: function (keywords, page) {
       var kw = (keywords || '').toLowerCase();
@@ -329,7 +337,7 @@
     categoryMenus: function () {
       var list = loadItems(this.host);
       var tabs = [{ title: '全部伴音', url: 'ta:all:1' }];
-      var names = ['央视', '卫视', '其他'], i, j;
+      var names = ['国家台', '卫视', '其他'], i, j;
       for (i = 0; i < names.length; i++) {
         for (j = 0; j < list.length; j++) {
           if (subGroupOf(list[j]) === names[i]) {
