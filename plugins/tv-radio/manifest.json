@@ -1,8 +1,8 @@
 {
   "name": "电视伴音",
-  "version": "1.2.5",
+  "version": "1.2.6",
   "author": "doubao",
-  "description": "fanmingming/live 电台源里只保留「电视伴音」分组：央视与卫视直播的纯音频频道，台标统一取 jackycher/tv-covers 的 360×480 白底竖版图，带正在播出的节目与当日节目单（央视 EPG + 凤凰 phtvperiodlist）",
+  "description": "fanmingming/live 电台源里只保留「电视伴音」分组：国家台与卫视直播的纯音频频道，台标统一取 jackycher/tv-covers 的 360×480 白底竖版图，带正在播出的节目与当日节目单",
   "scripts": [
     "radio.js"
   ]
