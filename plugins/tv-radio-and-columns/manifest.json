@@ -1,0 +1,10 @@
+{
+  "name": "电视伴音与栏目大全",
+  "version": "1.3.1",
+  "author": "doubao",
+  "description": "两源合一：①电视伴音——fanmingming/live 里「电视伴音」分组的国家台/卫视纯音频直播，带正在播与当日节目单；②栏目大全——栏目页清单，每期完整版可听、可看当天节目。台标与栏目封面统一取 jackycher/tv-covers 的 360×480 白底竖版图",
+  "scripts": [
+    "radio.js",
+    "cctvlm.js"
+  ]
+}
