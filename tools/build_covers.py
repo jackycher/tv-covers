@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-"""把央视栏目大全（tv.cctv.cn/lm）每个栏目自带的横版封面，转成 360x480 白底竖版，
+"""把栏目大全（tv.cctv.cn/lm）每个栏目自带的横版封面，转成 360x480 白底竖版，
 存到 column/<column_id>.jpg，并更新 data/columns.json 清单。
 
 只处理“仓库里还没有”或“封面地址变了”的栏目，因此每天跑一次就只补齐新增栏目。
@@ -21,7 +21,7 @@ ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 COL_DIR = os.path.join(ROOT, "column")
 DATA_FILE = os.path.join(ROOT, "data", "columns.json")
 REFERER = "https://tv.cctv.cn/lm/index.shtml"
-# cntv 的图片对海外机房 IP 返回 403，GitHub 的 runner 拉不到；
+# 图源对海外机房 IP 返回 403，GitHub 的 runner 拉不到；
 # 这里退一步，让 images.weserv.nl 帮忙取图并顺手做成 360×480 白底竖版。
 PROXY = ("https://images.weserv.nl/?url=%s"
          "&w=360&h=480&fit=contain&bg=white&output=png")
@@ -88,29 +88,28 @@ def main():
         cid = str(row.get("column_id") or "").strip()
         if not cid:
             continue
-        name = str(row.get("column_name") or "").strip()
         logo = str(row.get("column_logo") or "").strip()
         path = os.path.join(COL_DIR, cid + ".jpg")
         old = manifest.get(cid) or {}
-        same = old.get("logo") == logo and os.path.exists(path) and os.path.getsize(path) > 0
+        same = old.get("src") == logo and os.path.exists(path) and os.path.getsize(path) > 0
         if same:
             continue
         if not logo:
-            manifest[cid] = {"name": name, "logo": "", "cover": False}
+            manifest[cid] = {"src": "", "cover": False}
             continue
         try:
             raw, ready = grab(logo)
             img = portrait(raw, ready)
             img.save(path, "JPEG", quality=86, optimize=True)
-            manifest[cid] = {"name": name, "logo": logo, "cover": True}
+            manifest[cid] = {"src": logo, "cover": True}
             added += 1
             if added % 50 == 0:
                 print("已处理 %d 张" % added)
         except Exception as e:  # 单张失败不影响其余
-            print("跳过 %s %s: %s" % (cid, name, e))
+            print("跳过 %s: %s" % (cid, e))
             failed += 1
             if os.path.exists(path):
-                manifest[cid] = {"name": name, "logo": logo, "cover": True}
+                manifest[cid] = {"src": logo, "cover": True}
         time.sleep(0.05)
 
     os.makedirs(os.path.dirname(DATA_FILE), exist_ok=True)
