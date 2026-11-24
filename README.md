@@ -21,6 +21,8 @@
 源 ID 固定为「电视伴音」`b4c6d8e0f2a143759687a9b0c1d2e3f5`、
 「央视栏目大全」`f5b8a2c4d6e04719b3a5c7d9e1f2a4b6`，因此收藏与播放历史不会丢。
 
+每个 zip 的解包源码（打包前原样）在同名目录下：`plugins/tv-radio-and-cctv/`、`plugins/tv-radio/`、`plugins/cctv-columns/`，改完重新压缩即成新包；也可以在插件页用「从文件导入 zip」直接装。
+
 ## 封面图
 
 所有封面是 **360×480 纯白底竖版**，由 jsDelivr 直链提供（插件里用的就是这套）：
